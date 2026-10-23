@@ -146,6 +146,12 @@
     border-radius: 4px;
   }
   .btn:hover { background: var(--blue-dark); color: #fff; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.gold { color: var(--ink); background: linear-gradient(#fde4ad, var(--gold)); border-color: var(--gold-deep); }
+  .btn.gold:hover:not(:disabled) { background: #f8cf7c; color: var(--ink); }
+  .linkcheck { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .linkcheck .hint { color: var(--muted); font-size: 12px; }
+  .form .check:has(input:disabled) { color: var(--muted); }
 
   .empty { padding: 20px; text-align: center; color: var(--muted); border: 1px dashed var(--line); }
 
@@ -256,6 +262,12 @@
         <label for="f-link">Link to join <span class="hint">(WhatsApp invite, Facebook group, etc.)</span></label>
         <input id="f-link" type="url" placeholder="https://chat.whatsapp.com/...">
         <div class="err" data-for="f-link">Please paste a full link starting with https://</div>
+        <div class="linkcheck">
+          <button type="button" id="f-test" class="btn gold" disabled>Test this link &#8599;</button>
+          <span id="f-kind" class="hint">Paste your link, then test it.</span>
+        </div>
+        <label class="check"><input id="f-linkok" type="checkbox" disabled> I tested the link and it opens the right group.</label>
+        <div class="err" data-for="f-linkok">Please click "Test this link," make sure it opens your group, then check this box.</div>
 
         <label for="f-who">Your first name <span class="hint">(shown on the group)</span></label>
         <input id="f-who" type="text" maxlength="30">
@@ -508,6 +520,29 @@ $("#report-form").addEventListener("submit", async e => {
 // Form
 CATEGORIES.forEach(c => $("#f-cat").add(new Option(c, c)));
 
+// Link double check: the box can only be ticked after testing the current link.
+function linkLooksValid(v) {
+  return /^https:\/\/\S+\.\S+/.test(v);
+}
+function resetLinkCheck() {
+  const v = $("#f-link").value.trim();
+  const ok = linkLooksValid(v);
+  $("#f-test").disabled = !ok;
+  $("#f-linkok").checked = false;
+  $("#f-linkok").disabled = true;
+  $("#f-kind").textContent = ok
+    ? "This looks like a " + platform(v) + " link. Click to make sure it opens your group."
+    : "Paste your link, then test it.";
+}
+$("#f-link").addEventListener("input", resetLinkCheck);
+$("#f-test").addEventListener("click", () => {
+  const v = $("#f-link").value.trim();
+  if (!linkLooksValid(v)) return;
+  window.open(v, "_blank", "noopener");
+  $("#f-linkok").disabled = false;
+  $("#f-kind").textContent = "Did it open the right group? If so, check the box below.";
+});
+
 $("#form").addEventListener("submit", async e => {
   e.preventDefault();
   const val = id => $("#" + id).value.trim();
@@ -515,7 +550,8 @@ $("#form").addEventListener("submit", async e => {
     "f-name": !!val("f-name"),
     "f-cat": !!val("f-cat"),
     "f-desc": !!val("f-desc"),
-    "f-link": /^https:\/\/\S+\.\S+/.test(val("f-link")),
+    "f-link": linkLooksValid(val("f-link")),
+    "f-linkok": $("#f-linkok").checked,
     "f-who": !!val("f-who"),
     "f-email": /^\S+@\S+\.\S+$/.test(val("f-email")),
     "f-ok": $("#f-ok").checked
@@ -554,6 +590,7 @@ $("#form").addEventListener("submit", async e => {
   if (result.group) groups.push(result.group);
   fillReportGroups();
   e.target.reset();
+  resetLinkCheck();
   currentCat = "All";
   $("#q").value = "";
   location.hash = "#browse";
