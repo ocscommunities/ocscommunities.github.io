@@ -11,7 +11,7 @@ const CATEGORIES = [
   "Festivals & volunteering"
 ];
 const GROUP_HEADERS = ["id", "added", "name", "category", "description", "link", "first_name", "email"];
-const REPORT_HEADERS = ["reported", "group_id", "group_name", "link", "reason", "note"];
+const REPORT_HEADERS = ["reported", "group_id", "group_name", "link", "reason", "note", "reply_email"];
 const REPORT_REASONS = ["Broken link", "Something inappropriate", "Wrong information", "Other"];
 
 // Run once from the editor: creates the Groups and Reports tabs with headers.
@@ -98,6 +98,8 @@ function addReport(d) {
   const id = clean(d.id, 20);
   const reason = REPORT_REASONS.indexOf(clean(d.reason, 40)) === -1 ? "Other" : clean(d.reason, 40);
   const note = clean(d.note, 500);
+  const replyEmail = clean(d.email, 120);
+  if (replyEmail && !/^\S+@\S+\.\S+$/.test(replyEmail)) return json({ ok: false, error: "Please add a valid email so we can reply." });
 
   let row = null;
   if (id) {
@@ -111,22 +113,26 @@ function addReport(d) {
   const name = row ? String(row[2]) : "";
   const link = row ? String(row[5]) : "";
   SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Reports")
-    .appendRow([new Date(), id, safe(name), safe(link), reason, safe(note)]);
+    .appendRow([new Date(), id, safe(name), safe(link), reason, safe(note), safe(replyEmail)]);
 
   notify("Report: " + reason + (row ? " - " + name : ""),
     "Someone sent a report.\n\n" +
     "What's wrong: " + reason + "\n" +
     (note ? "Details: " + note + "\n" : "") +
+    (replyEmail ? "They'd like a reply: " + replyEmail + " (just hit Reply)\n" : "No reply requested.\n") +
     (row ? "\nGroup: " + name + "\n" + link + "\nStarted by " + row[6] + " (" + row[7] + ")\n" : "\nNot about a specific group.\n") +
-    "\n" + SpreadsheetApp.getActiveSpreadsheet().getUrl());
+    "\n" + SpreadsheetApp.getActiveSpreadsheet().getUrl(),
+    replyEmail);
 
   return json({ ok: true });
 }
 
 // Emails the sheet's owner (you). Free limit is 100 a day.
-function notify(subject, body) {
+// With replyTo, hitting Reply on the notice goes to that person.
+function notify(subject, body, replyTo) {
   try {
-    MailApp.sendEmail(Session.getEffectiveUser().getEmail(), "[OC Communities] " + subject, body);
+    MailApp.sendEmail(Session.getEffectiveUser().getEmail(), "[OC Communities] " + subject, body,
+      replyTo ? { replyTo: replyTo } : {});
   } catch (err) {
     // A failed notice should never block a parent from adding a group.
   }

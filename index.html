@@ -314,6 +314,13 @@
         <textarea id="r-note" maxlength="500" placeholder="Anything that helps us fix it"></textarea>
         <div class="err" data-for="r-note">Please pick a group or describe the problem.</div>
 
+        <label class="check"><input id="r-wantreply" type="checkbox"> I'd like a reply</label>
+        <div id="r-email-wrap" hidden>
+          <label for="r-email">Your email <span class="hint">(private, only used to reply to you)</span></label>
+          <input id="r-email" type="email" placeholder="you@example.com">
+          <div class="err" data-for="r-email">Please add a valid email so we can reply.</div>
+        </div>
+
         <div id="report-err" class="err"></div>
         <div class="actions">
           <button class="btn" type="submit">Send report</button>
@@ -490,9 +497,12 @@ $("#report-form").addEventListener("submit", async e => {
   e.preventDefault();
   const id = $("#r-group").value;
   const note = $("#r-note").value.trim();
-  const noteErr = document.querySelector('.err[data-for="r-note"]');
-  noteErr.style.display = id || note ? "none" : "block";
-  if (!id && !note) return;
+  const wantReply = $("#r-wantreply").checked;
+  const email = wantReply ? $("#r-email").value.trim() : "";
+  const emailOk = !wantReply || /^\S+@\S+\.\S+$/.test(email);
+  document.querySelector('.err[data-for="r-note"]').style.display = id || note ? "none" : "block";
+  document.querySelector('.err[data-for="r-email"]').style.display = emailOk ? "none" : "block";
+  if ((!id && !note) || !emailOk) return;
 
   const btn = e.target.querySelector("button[type=submit]");
   const err = $("#report-err");
@@ -501,7 +511,7 @@ $("#report-form").addEventListener("submit", async e => {
   err.style.display = "none";
   let result;
   try {
-    result = await post({ action: "report", id, reason: $("#r-reason").value, note });
+    result = await post({ action: "report", id, reason: $("#r-reason").value, note, email });
   } catch (ex) {
     result = { ok: false, error: "Couldn't reach the server. Please try again." };
   }
@@ -513,8 +523,15 @@ $("#report-form").addEventListener("submit", async e => {
     return;
   }
   e.target.reset();
+  $("#r-email-wrap").hidden = true;
   e.target.hidden = true;
   $("#report-ok").hidden = false;
+});
+
+$("#r-wantreply").addEventListener("change", e => {
+  $("#r-email-wrap").hidden = !e.target.checked;
+  if (e.target.checked) $("#r-email").focus();
+  else document.querySelector('.err[data-for="r-email"]').style.display = "none";
 });
 
 // Form
