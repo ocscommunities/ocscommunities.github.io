@@ -184,12 +184,29 @@
   }
 
   [hidden] { display: none !important; }
+  .short { display: none; }
 
   @media (max-width: 700px) {
     .wrap { margin: 0; border: 0; }
-    .masthead, .notice { padding-left: 16px; padding-right: 16px; }
-    .navbar { padding: 0 6px; }
+
+    /* Phone header: centered logo and title, menu as a 2 x 2 grid of buttons */
+    .masthead { flex-direction: column; text-align: center; gap: 0; padding: 14px 16px 10px; }
+    .mark { padding: 4px 8px; }
+    .mark img { width: 76px; }
+    .masthead h1 { font-size: 20px; line-height: 1.2; margin-top: 8px; }
+    .masthead p { font-size: 12px; margin-top: 3px; }
+    .long { display: none; }
+    .short { display: inline; }
+    .notice { padding-left: 16px; padding-right: 16px; }
+    .navbar { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px 16px 10px; }
     .navbar .spacer { display: none; }
+    .navbar a, .navbar a.on {
+      text-align: center; padding: 7px 4px; margin: 0;
+      background: #fdecc4; border: 1px solid var(--gold-dark); border-radius: 4px;
+    }
+    .navbar a.on { background: var(--panel); }
+    .navbar .start-link, .navbar .start-link.on { color: #fff; background: var(--blue); border-color: var(--blue-dark); }
+    .navbar .start-link:hover { background: var(--blue-dark); }
     .cols { flex-direction: column; padding: 16px; gap: 8px; }
     .side { width: auto; }
     .cats { display: flex; flex-wrap: wrap; gap: 6px; border: 0; }
@@ -207,7 +224,7 @@
     <div class="mark"><img src="images/ocs-logo-white.png" alt="Ocean Charter School"></div>
     <div>
       <h1>Ocean Charter Communities</h1>
-      <p>Find your people. Parent-run groups for Ocean Charter School families.</p>
+      <p><span class="long">Find your people. Parent-run groups for Ocean Charter School families.</span><span class="short">Parent-run groups for OCS families</span></p>
     </div>
   </div>
 
