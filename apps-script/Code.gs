@@ -5,14 +5,14 @@
 
 const CATEGORIES = [
   "Learning differences",
-  "Grades & classes",
   "Culture & language",
   "Family life",
   "Interests & hobbies",
   "Festivals & volunteering"
 ];
 const GROUP_HEADERS = ["id", "added", "name", "category", "description", "link", "first_name", "email"];
-const REPORT_HEADERS = ["reported", "group_id", "group_name", "link"];
+const REPORT_HEADERS = ["reported", "group_id", "group_name", "link", "reason", "note"];
+const REPORT_REASONS = ["Broken link", "Something inappropriate", "Wrong information", "Other"];
 
 // Run once from the editor: creates the Groups and Reports tabs with headers.
 function setup() {
@@ -93,20 +93,32 @@ function addGroup(d) {
   return json({ ok: true, group: { id, added: added.toISOString(), name: g.name, cat: g.cat, desc: g.desc, link: g.link, who: g.who } });
 }
 
+// A report can be about one group, or general (no group, but then a note is required).
 function addReport(d) {
   const id = clean(d.id, 20);
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Groups");
-  const row = sh.getDataRange().getValues().slice(1).find(r => String(r[0]) === id);
-  if (!row) return json({ ok: false, error: "Group not found" });
+  const reason = REPORT_REASONS.indexOf(clean(d.reason, 40)) === -1 ? "Other" : clean(d.reason, 40);
+  const note = clean(d.note, 500);
 
+  let row = null;
+  if (id) {
+    const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Groups");
+    row = sh.getDataRange().getValues().slice(1).find(r => String(r[0]) === id);
+    if (!row) return json({ ok: false, error: "Group not found" });
+  } else if (!note) {
+    return json({ ok: false, error: "Please pick a group or describe the problem." });
+  }
+
+  const name = row ? String(row[2]) : "";
+  const link = row ? String(row[5]) : "";
   SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Reports")
-    .appendRow([new Date(), id, safe(String(row[2])), safe(String(row[5]))]);
+    .appendRow([new Date(), id, safe(name), safe(link), reason, safe(note)]);
 
-  notify("Broken link reported: " + row[2],
-    "Someone reported that this group's link may be broken.\n\n" +
-    row[2] + "\n" + row[5] + "\n" +
-    "Started by " + row[6] + " (" + row[7] + ")\n\n" +
-    SpreadsheetApp.getActiveSpreadsheet().getUrl());
+  notify("Report: " + reason + (row ? " - " + name : ""),
+    "Someone sent a report.\n\n" +
+    "What's wrong: " + reason + "\n" +
+    (note ? "Details: " + note + "\n" : "") +
+    (row ? "\nGroup: " + name + "\n" + link + "\nStarted by " + row[6] + " (" + row[7] + ")\n" : "\nNot about a specific group.\n") +
+    "\n" + SpreadsheetApp.getActiveSpreadsheet().getUrl());
 
   return json({ ok: true });
 }

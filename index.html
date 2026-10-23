@@ -74,9 +74,10 @@
   .navbar .start-link { color: var(--blue-dark); }
 
   .notice {
-    margin: 0; padding: 7px 28px;
-    font-size: 12px; color: var(--muted);
-    border-bottom: 1px dotted var(--line);
+    margin: 0; padding: 8px 28px;
+    font-size: 13px; font-weight: 700; color: var(--ink);
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
   }
 
   /* Layout */
@@ -207,6 +208,7 @@
   <nav class="navbar">
     <a href="#browse" data-nav="browse">Browse groups</a>
     <a href="#about" data-nav="about">How it works</a>
+    <a href="#report" data-nav="report">Report a problem</a>
     <span class="spacer"></span>
     <a href="#start" data-nav="start" class="start-link">+ Start a group</a>
   </nav>
@@ -240,7 +242,7 @@
       <p>Make your group in WhatsApp, Facebook, or anywhere else first. Then add it here so other families can find it.</p>
       <form id="form" class="form" novalidate>
         <label for="f-name">Group name</label>
-        <input id="f-name" type="text" maxlength="60" placeholder="e.g. 2nd Grade Park Meetups">
+        <input id="f-name" type="text" maxlength="60" placeholder="e.g. Saturday Park Meetups">
         <div class="err" data-for="f-name">Please add a group name.</div>
 
         <label for="f-cat">Category</label>
@@ -278,17 +280,48 @@
     </div>
   </section>
 
+  <!-- Report a problem -->
+  <section id="view-report" class="cols page" hidden>
+    <div class="main">
+      <h2>Report a problem</h2>
+      <p>Broken link, something that doesn't belong, or wrong information? Let us know and we'll look into it.</p>
+      <div id="report-ok" class="ok" hidden><strong>Thanks for letting us know.</strong> We'll take a look.</div>
+      <form id="report-form" class="form" novalidate>
+        <label for="r-group">Which group?</label>
+        <select id="r-group"><option value="">Not about a specific group</option></select>
+
+        <label for="r-reason">What's wrong?</label>
+        <select id="r-reason">
+          <option>Broken link</option>
+          <option>Something inappropriate</option>
+          <option>Wrong information</option>
+          <option>Other</option>
+        </select>
+
+        <label for="r-note">Details <span class="hint">(optional if you picked a group)</span></label>
+        <textarea id="r-note" maxlength="500" placeholder="Anything that helps us fix it"></textarea>
+        <div class="err" data-for="r-note">Please pick a group or describe the problem.</div>
+
+        <div id="report-err" class="err"></div>
+        <div class="actions">
+          <button class="btn" type="submit">Send report</button>
+          <a href="#browse">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
   <!-- How it works -->
   <section id="view-about" class="cols page" hidden>
     <div class="main">
       <h2>How it works</h2>
-      <p>This is a simple directory of parent-run groups at Ocean Charter School. Families use it to find each other: by grade, interest, language, or shared experience.</p>
+      <p>This is a simple directory of parent-run groups at Ocean Charter School. Families use it to find each other: by interest, language, or shared experience.</p>
       <h3>Joining a group</h3>
       <p>Click <strong>Join</strong>. You'll go to the group's WhatsApp, Facebook, or other page. The person who started the group lets new members in from there.</p>
       <h3>Starting a group</h3>
       <p>Create your group in the app you like, then <a href="#start">add it here</a>. It shows up right away. Your email stays private. It's only used if we need to reach you about your group.</p>
       <h3>Broken link?</h3>
-      <p>Click <strong>Report broken link</strong> under the group, and we'll look into it.</p>
+      <p>Click <strong>Report broken link</strong> under the group, or use <a href="#report">Report a problem</a> in the menu for anything else.</p>
       <h3>Change or remove a group</h3>
       <p>Email <a href="mailto:avigdor@crunchybuzz.com">avigdor@crunchybuzz.com</a> from the address you used when you added it.</p>
     </div>
@@ -303,7 +336,6 @@
 <script>
 const CATEGORIES = [
   "Learning differences",
-  "Grades & classes",
   "Culture & language",
   "Family life",
   "Interests & hobbies",
@@ -336,6 +368,7 @@ async function loadGroups() {
   } catch (err) {
     loadState = "error";
   }
+  fillReportGroups();
   renderCats();
   renderList();
 }
@@ -410,21 +443,67 @@ function renderList() {
       e.preventDefault();
       const note = Object.assign(document.createElement("span"), { className: "flash", textContent: "Thanks. We'll check this link." });
       e.target.replaceWith(note);
-      post({ action: "report", id: g.id }).catch(() => {});
+      post({ action: "report", id: g.id, reason: "Broken link" }).catch(() => {});
     };
     list.appendChild(div);
   });
 }
 
+const VIEWS = ["browse", "start", "report", "about"];
+
 function show(view) {
-  ["browse", "start", "about"].forEach(v => $("#view-" + v).hidden = v !== view);
+  VIEWS.forEach(v => $("#view-" + v).hidden = v !== view);
   document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("on", a.dataset.nav === view));
+  if (view === "report") {
+    $("#report-ok").hidden = true;
+    $("#report-form").hidden = false;
+  }
   window.scrollTo(0, 0);
 }
 function route() {
   const v = (location.hash || "#browse").slice(1);
-  show(["browse", "start", "about"].includes(v) ? v : "browse");
+  show(VIEWS.includes(v) ? v : "browse");
 }
+
+function fillReportGroups() {
+  const sel = $("#r-group");
+  const keep = sel.value;
+  sel.length = 1;
+  [...groups].sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(g => sel.add(new Option(g.name, g.id)));
+  sel.value = keep;
+}
+
+$("#report-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const id = $("#r-group").value;
+  const note = $("#r-note").value.trim();
+  const noteErr = document.querySelector('.err[data-for="r-note"]');
+  noteErr.style.display = id || note ? "none" : "block";
+  if (!id && !note) return;
+
+  const btn = e.target.querySelector("button[type=submit]");
+  const err = $("#report-err");
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  err.style.display = "none";
+  let result;
+  try {
+    result = await post({ action: "report", id, reason: $("#r-reason").value, note });
+  } catch (ex) {
+    result = { ok: false, error: "Couldn't reach the server. Please try again." };
+  }
+  btn.disabled = false;
+  btn.textContent = "Send report";
+  if (!result.ok) {
+    err.textContent = result.error || "Something went wrong. Please try again.";
+    err.style.display = "block";
+    return;
+  }
+  e.target.reset();
+  e.target.hidden = true;
+  $("#report-ok").hidden = false;
+});
 
 // Form
 CATEGORIES.forEach(c => $("#f-cat").add(new Option(c, c)));
@@ -473,6 +552,7 @@ $("#form").addEventListener("submit", async e => {
   }
 
   if (result.group) groups.push(result.group);
+  fillReportGroups();
   e.target.reset();
   currentCat = "All";
   $("#q").value = "";
