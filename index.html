@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ocean Charter Communities</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f4e8cc;
+    --panel: #fffaf0;
+    --gold: #fbdd9e;
+    --gold-dark: #e3c27a;
+    --gold-deep: #c99a3a;
+    --blue: #3a76b5;
+    --blue-dark: #2a5a8c;
+    --ink: #33302a;
+    --muted: #7a7264;
+    --line: #e6d4a8;
+    --card: #fff6e2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(255,255,255,.55), transparent 40%),
+      radial-gradient(circle at 85% 30%, rgba(230,200,140,.35), transparent 45%),
+      radial-gradient(circle at 40% 90%, rgba(255,255,255,.4), transparent 40%);
+    color: var(--ink);
+    font: 14px/1.6 Montserrat, Arial, sans-serif;
+  }
+  a { color: var(--blue); }
+  a:hover { color: var(--blue-dark); }
+
+  .wrap {
+    max-width: 920px;
+    margin: 24px auto;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 3px rgba(120,90,30,.12);
+  }
+
+  /* Header */
+  .masthead { padding: 22px 28px 16px; display: flex; align-items: center; gap: 16px; }
+  .mark {
+    width: 54px; height: 54px; flex: none;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--gold-deep);
+    display: grid; place-items: center;
+    color: var(--blue-dark); font-weight: 700; font-size: 18px;
+  }
+  .masthead h1 { margin: 0; color: var(--blue); font-size: 24px; font-weight: 700; letter-spacing: .2px; }
+  .masthead p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+
+  /* Nav bar */
+  .navbar {
+    background: var(--gold);
+    border-top: 1px solid var(--gold-dark);
+    border-bottom: 1px solid var(--gold-dark);
+    display: flex; flex-wrap: wrap;
+    padding: 0 18px;
+  }
+  .navbar a {
+    color: var(--ink); text-decoration: none;
+    padding: 9px 12px; font-size: 13px; font-weight: 600;
+  }
+  .navbar a:hover { background: #f8cf7c; }
+  .navbar a.on { background: var(--panel); border-left: 1px solid var(--gold-dark); border-right: 1px solid var(--gold-dark); margin-bottom: -1px; }
+  .navbar .spacer { flex: 1; }
+  .navbar .start-link { color: var(--blue-dark); }
+
+  .notice {
+    margin: 0; padding: 7px 28px;
+    font-size: 12px; color: var(--muted);
+    border-bottom: 1px dotted var(--line);
+  }
+
+  /* Layout */
+  .cols { display: flex; gap: 24px; padding: 20px 28px 28px; }
+  .side { width: 210px; flex: none; }
+  .main { flex: 1; min-width: 0; }
+
+  .side h3, .main h2 {
+    color: var(--blue); margin: 0 0 8px;
+    font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .main h2 { font-size: 18px; text-transform: none; letter-spacing: 0; }
+
+  .search {
+    width: 100%; padding: 6px 8px;
+    border: 1px solid var(--gold-dark); background: #fff;
+    font: inherit; margin-bottom: 18px;
+  }
+  .cats { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .cats li { border-bottom: 1px solid var(--line); }
+  .cats a {
+    display: flex; justify-content: space-between;
+    padding: 6px 4px; text-decoration: none; color: var(--ink);
+  }
+  .cats a:hover { background: var(--card); }
+  .cats a.on { color: var(--blue-dark); font-weight: 700; background: var(--card); }
+  .cats .n { color: var(--muted); font-size: 12px; }
+  .side-box {
+    margin-top: 20px; padding: 10px 12px;
+    background: var(--card); border: 1px solid var(--line);
+    font-size: 12px; color: var(--muted);
+  }
+  .side-box strong { color: var(--ink); }
+
+  .listhead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+  .count { color: var(--muted); font-size: 12px; }
+
+  /* Group card */
+  .group {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .group h4 { margin: 0; font-size: 15px; color: var(--ink); }
+  .meta { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
+  .tag {
+    display: inline-block; padding: 0 6px; margin-right: 4px;
+    background: var(--gold); border: 1px solid var(--gold-dark);
+    border-radius: 3px; font-size: 11px; color: var(--ink);
+  }
+  .new { background: #dcebf8; border-color: #a9c7e6; color: var(--blue-dark); }
+  .group p { margin: 0 0 10px; }
+  .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .report { font-size: 12px; color: var(--muted); }
+  .flash { font-size: 12px; color: var(--blue-dark); }
+
+  .btn {
+    display: inline-block; cursor: pointer;
+    padding: 5px 14px;
+    font: 600 13px Montserrat, Arial, sans-serif;
+    color: #fff; text-decoration: none;
+    background: linear-gradient(#4a86c5, var(--blue));
+    border: 1px solid var(--blue-dark);
+    border-radius: 4px;
+  }
+  .btn:hover { background: var(--blue-dark); color: #fff; }
+
+  .empty { padding: 20px; text-align: center; color: var(--muted); border: 1px dashed var(--line); }
+
+  /* Form */
+  .form { max-width: 520px; }
+  .form label { display: block; font-weight: 600; margin: 14px 0 4px; }
+  .form .hint { font-weight: 400; color: var(--muted); font-size: 12px; }
+  .form input[type=text], .form input[type=email], .form input[type=url], .form select, .form textarea {
+    width: 100%; padding: 6px 8px;
+    border: 1px solid var(--gold-dark); background: #fff;
+    font: inherit;
+  }
+  .form textarea { height: 70px; resize: vertical; }
+  .form .check { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; margin-top: 16px; }
+  .form .actions { margin-top: 18px; display: flex; gap: 12px; align-items: center; }
+  .err { color: #a33; font-size: 12px; margin-top: 4px; display: none; }
+  .ok {
+    background: #eef6e6; border: 1px solid #b9d6a0; padding: 12px 14px; margin-bottom: 16px;
+  }
+
+  .page p, .page li { max-width: 600px; }
+  .page h3 { color: var(--blue); font-size: 14px; margin: 18px 0 4px; }
+
+  footer {
+    border-top: 1px solid var(--gold-dark);
+    background: var(--gold);
+    padding: 10px 28px;
+    font-size: 12px; color: var(--ink);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
+  }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 700px) {
+    .wrap { margin: 0; border: 0; }
+    .masthead, .notice { padding-left: 16px; padding-right: 16px; }
+    .navbar { padding: 0 6px; }
+    .navbar .spacer { display: none; }
+    .cols { flex-direction: column; padding: 16px; gap: 8px; }
+    .side { width: auto; }
+    .cats { display: flex; flex-wrap: wrap; gap: 6px; border: 0; }
+    .cats li { border: 0; }
+    .cats a { border: 1px solid var(--line); border-radius: 14px; padding: 2px 10px; gap: 6px; }
+    .side-box { display: none; }
+    footer { padding: 10px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="mark">OC</div>
+    <div>
+      <h1>Ocean Charter Communities</h1>
+      <p>Find your people. Parent-run groups for Ocean Charter School families.</p>
+    </div>
+  </div>
+
+  <nav class="navbar">
+    <a href="#browse" data-nav="browse">Browse groups</a>
+    <a href="#about" data-nav="about">How it works</a>
+    <span class="spacer"></span>
+    <a href="#start" data-nav="start" class="start-link">+ Start a group</a>
+  </nav>
+  <p class="notice">A parent-run directory. Not an official Ocean Charter School website.</p>
+
+  <!-- Browse -->
+  <section id="view-browse" class="cols">
+    <aside class="side">
+      <h3>Search</h3>
+      <input id="q" class="search" type="search" placeholder="e.g. Spanish, hiking, K">
+      <h3>Categories</h3>
+      <ul id="cats" class="cats"></ul>
+      <div class="side-box">
+        <strong>Don't see your group?</strong><br>
+        Anyone in the OCS community can <a href="#start">start one</a>. It takes about a minute.
+      </div>
+    </aside>
+    <div class="main">
+      <div class="listhead">
+        <h2 id="listtitle">All groups</h2>
+        <span id="count" class="count"></span>
+      </div>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <!-- Start a group -->
+  <section id="view-start" class="cols page" hidden>
+    <div class="main">
+      <h2>Start a group</h2>
+      <p>Make your group in WhatsApp, Facebook, or anywhere else first. Then add it here so other families can find it.</p>
+      <form id="form" class="form" novalidate>
+        <label for="f-name">Group name</label>
+        <input id="f-name" type="text" maxlength="60" placeholder="e.g. 2nd Grade Park Meetups">
+        <div class="err" data-for="f-name">Please add a group name.</div>
+
+        <label for="f-cat">Category</label>
+        <select id="f-cat"><option value="">Choose one…</option></select>
+        <div class="err" data-for="f-cat">Please choose a category.</div>
+
+        <label for="f-desc">Short description <span class="hint">(one or two sentences)</span></label>
+        <textarea id="f-desc" maxlength="200" placeholder="Who is it for? What do you do together?"></textarea>
+        <div class="err" data-for="f-desc">Please add a short description.</div>
+
+        <label for="f-link">Link to join <span class="hint">(WhatsApp invite, Facebook group, etc.)</span></label>
+        <input id="f-link" type="url" placeholder="https://chat.whatsapp.com/...">
+        <div class="err" data-for="f-link">Please paste a full link starting with https://</div>
+
+        <label for="f-who">Your first name <span class="hint">(shown on the group)</span></label>
+        <input id="f-who" type="text" maxlength="30">
+        <div class="err" data-for="f-who">Please add your first name.</div>
+
+        <label for="f-email">Your email <span class="hint">(private, never shown on the site)</span></label>
+        <input id="f-email" type="email" placeholder="you@example.com">
+        <div class="err" data-for="f-email">Please add a valid email.</div>
+
+        <label class="check"><input id="f-ok" type="checkbox"> I'm part of the Ocean Charter community, and I'll let people in through my group's own app.</label>
+        <div class="err" data-for="f-ok">Please check this box.</div>
+
+        <!-- Spam trap: hidden from people, bots fill it in. -->
+        <input id="f-website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+
+        <div id="form-err" class="err"></div>
+        <div class="actions">
+          <button class="btn" type="submit">Add my group</button>
+          <a href="#browse">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="view-about" class="cols page" hidden>
+    <div class="main">
+      <h2>How it works</h2>
+      <p>This is a simple directory of parent-run groups at Ocean Charter School. Families use it to find each other: by grade, interest, language, or shared experience.</p>
+      <h3>Joining a group</h3>
+      <p>Click <strong>Join</strong>. You'll go to the group's WhatsApp, Facebook, or other page. The person who started the group lets new members in from there.</p>
+      <h3>Starting a group</h3>
+      <p>Create your group in the app you like, then <a href="#start">add it here</a>. It shows up right away. Your email stays private. It's only used if we need to reach you about your group.</p>
+      <h3>Broken link?</h3>
+      <p>Click <strong>Report broken link</strong> under the group, and we'll look into it.</p>
+      <h3>Change or remove a group</h3>
+      <p>Email <a href="mailto:hello@example.com">hello@example.com</a> from the address you used when you added it.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Ocean Charter Communities: run by OCS parents.</span>
+    <span><a href="#about" style="color:inherit">How it works</a></span>
+  </footer>
+</div>
+
+<script>
+const CATEGORIES = [
+  "Learning differences",
+  "Grades & classes",
+  "Culture & language",
+  "Family life",
+  "Interests & hobbies",
+  "Festivals & volunteering"
+];
+
+// The Google Sheet's script (see apps-script/Code.gs). It never returns emails.
+const API = "https://script.google.com/macros/s/AKfycbwD6kYCBDGbipeoMuA8AemfXAOJMDYq4EMbMJZHO3keRxD66LE7qQwuzHd2IQP8tSvN/exec";
+
+let groups = [];
+let loadState = "loading"; // loading | ready | error
+let currentCat = "All";
+
+function daysAgo(g) {
+  return (Date.now() - new Date(g.added).getTime()) / 86400000;
+}
+
+async function post(data) {
+  const res = await fetch(API, { method: "POST", body: JSON.stringify(data) });
+  return res.json();
+}
+
+async function loadGroups() {
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+    groups = data.groups;
+    loadState = "ready";
+  } catch (err) {
+    loadState = "error";
+  }
+  renderCats();
+  renderList();
+}
+const $ = s => document.querySelector(s);
+
+function platform(link) {
+  if (/whatsapp\.com|wa\.me/.test(link)) return "WhatsApp";
+  if (/facebook\.com|fb\.com/.test(link)) return "Facebook";
+  return "website";
+}
+
+function renderCats() {
+  const ul = $("#cats");
+  ul.innerHTML = "";
+  ["All", ...CATEGORIES].forEach(c => {
+    const n = c === "All" ? groups.length : groups.filter(g => g.cat === c).length;
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = "#browse";
+    a.className = c === currentCat ? "on" : "";
+    a.innerHTML = `<span></span><span class="n">${n}</span>`;
+    a.firstChild.textContent = c === "All" ? "All groups" : c;
+    a.onclick = e => { e.preventDefault(); currentCat = c; renderCats(); renderList(); };
+    li.appendChild(a);
+    ul.appendChild(li);
+  });
+}
+
+function renderList() {
+  const q = $("#q").value.trim().toLowerCase();
+  const shown = groups
+    .filter(g => currentCat === "All" || g.cat === currentCat)
+    .filter(g => !q || (g.name + " " + g.desc + " " + g.cat).toLowerCase().includes(q))
+    .sort((a, b) => daysAgo(a) - daysAgo(b));
+
+  $("#listtitle").textContent = currentCat === "All" ? "All groups" : currentCat;
+  $("#count").textContent = loadState === "ready" ? shown.length + (shown.length === 1 ? " group" : " groups") : "";
+
+  const list = $("#list");
+  list.innerHTML = "";
+  if (loadState === "loading") {
+    list.innerHTML = `<div class="empty">Loading groups…</div>`;
+    return;
+  }
+  if (loadState === "error") {
+    list.innerHTML = `<div class="empty">Sorry, the groups didn't load. Please refresh the page in a minute.</div>`;
+    return;
+  }
+  if (!shown.length) {
+    list.innerHTML = groups.length
+      ? `<div class="empty">No groups match yet. <a href="#start">Start one?</a></div>`
+      : `<div class="empty">No groups yet. <a href="#start">Be the first to start one!</a></div>`;
+    return;
+  }
+  shown.forEach(g => {
+    const div = document.createElement("div");
+    div.className = "group";
+    div.innerHTML = `
+      <h4></h4>
+      <div class="meta"><span class="tag"></span>${daysAgo(g) <= 7 ? '<span class="tag new">New</span>' : ""}<span class="who"></span></div>
+      <p></p>
+      <div class="row">
+        <a class="btn" target="_blank" rel="noopener noreferrer">Join on ${platform(g.link)} &rarr;</a>
+        <a class="report" href="#">Report broken link</a>
+      </div>`;
+    div.querySelector("h4").textContent = g.name;
+    div.querySelector(".tag").textContent = g.cat;
+    div.querySelector(".who").textContent = " Started by " + g.who;
+    div.querySelector("p").textContent = g.desc;
+    if (/^https:\/\//.test(g.link)) div.querySelector(".btn").href = g.link;
+    div.querySelector(".report").onclick = e => {
+      e.preventDefault();
+      const note = Object.assign(document.createElement("span"), { className: "flash", textContent: "Thanks. We'll check this link." });
+      e.target.replaceWith(note);
+      post({ action: "report", id: g.id }).catch(() => {});
+    };
+    list.appendChild(div);
+  });
+}
+
+function show(view) {
+  ["browse", "start", "about"].forEach(v => $("#view-" + v).hidden = v !== view);
+  document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("on", a.dataset.nav === view));
+  window.scrollTo(0, 0);
+}
+function route() {
+  const v = (location.hash || "#browse").slice(1);
+  show(["browse", "start", "about"].includes(v) ? v : "browse");
+}
+
+// Form
+CATEGORIES.forEach(c => $("#f-cat").add(new Option(c, c)));
+
+$("#form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const val = id => $("#" + id).value.trim();
+  const checks = {
+    "f-name": !!val("f-name"),
+    "f-cat": !!val("f-cat"),
+    "f-desc": !!val("f-desc"),
+    "f-link": /^https:\/\/\S+\.\S+/.test(val("f-link")),
+    "f-who": !!val("f-who"),
+    "f-email": /^\S+@\S+\.\S+$/.test(val("f-email")),
+    "f-ok": $("#f-ok").checked
+  };
+  let ok = true;
+  for (const [id, pass] of Object.entries(checks)) {
+    document.querySelector(`.err[data-for="${id}"]`).style.display = pass ? "none" : "block";
+    if (!pass) ok = false;
+  }
+  if (!ok) return;
+
+  const btn = e.target.querySelector("button[type=submit]");
+  const formErr = $("#form-err");
+  btn.disabled = true;
+  btn.textContent = "Adding…";
+  formErr.style.display = "none";
+  let result;
+  try {
+    result = await post({
+      action: "add",
+      name: val("f-name"), cat: val("f-cat"), desc: val("f-desc"),
+      link: val("f-link"), who: val("f-who"), email: val("f-email"),
+      website: val("f-website")
+    });
+  } catch (err) {
+    result = { ok: false, error: "Couldn't reach the server. Please try again." };
+  }
+  btn.disabled = false;
+  btn.textContent = "Add my group";
+  if (!result.ok) {
+    formErr.textContent = result.error || "Something went wrong. Please try again.";
+    formErr.style.display = "block";
+    return;
+  }
+
+  if (result.group) groups.push(result.group);
+  e.target.reset();
+  currentCat = "All";
+  $("#q").value = "";
+  location.hash = "#browse";
+  renderCats();
+  renderList();
+  const okBox = document.createElement("div");
+  okBox.className = "ok";
+  okBox.innerHTML = "<strong>Your group is live.</strong> It's at the top of the list. Thanks for building community!";
+  $("#list").prepend(okBox);
+});
+
+$("#q").addEventListener("input", renderList);
+window.addEventListener("hashchange", route);
+
+renderCats();
+renderList();
+route();
+loadGroups();
+</script>
+</body>
+</html>
